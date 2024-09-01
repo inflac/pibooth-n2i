@@ -19,12 +19,14 @@ def main():
         long_description=open(osp.join(HERE, 'README.md'), encoding='utf-8').read(),
         long_description_content_type='text/x-rst',
         classifiers=[
-            'Development Status :: 2 - Pre-Alpha',
+            'Development Status :: 5 - Production/Stable',
             'Environment :: Other Environment',
             'Intended Audience :: Developers',
             'Intended Audience :: End Users/Desktop',
             'License :: OSI Approved :: GNU Affero General Public License v3',
             'Operating System :: POSIX :: Linux',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
@@ -46,7 +48,7 @@ def main():
             'CMS'
         ],
         py_modules=['pibooth_n2i'],
-        python_requires=">=3.8",
+        python_requires=">=3.6",
         install_requires=[
             'pibooth>=2.0.0'
         ],
