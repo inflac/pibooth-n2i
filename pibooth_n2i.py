@@ -17,20 +17,42 @@ def upload(file:str, n2i_url:str, n2i_token:str):
     resp = re.post(n2i_url, files=file_param, headers=headers)
     if resp.status_code != 200:
         LOGGER.info("[N2i] Upload failed")
-    print(f"N2i URL: {n2i_url}")
-    print(f"N2i token: {n2i_token}")
-    print(f"Image: {file}")
+        LOGGER.info(f"[N2i] URL: {n2i_url}")
+        LOGGER.info(f"[N2i] Token: {n2i_token[:5]}...{n2i_token[-5:]}")
+        LOGGER.info(f"[N2i] Image: {file}")
 
 @pibooth.hookimpl
-def pibooth_startup(app, cfg):
+def pibooth_configure(cfg):
     cfg.add_option(SECTION, "n2i_url", "", "Pibooth Endpoint URL")
     cfg.add_option(SECTION, "n2i_token", "", "Pibooth Auth Token")
 
 @pibooth.hookimpl
-def state_processing_exit(app, cfg):
+def pibooth_startup(app, cfg):
     n2i_url = cfg.get(SECTION, "n2i_url")
-    n2i_token = cfg.get(SECTION, "n2i_token") 
+    n2i_token = cfg.get(SECTION, "n2i_token")
+
+    if not n2i_url or len(n2i_url) < 4: #url shorther than http scheme length
+        LOGGER.error(
+            "N2i URL not defined in ["
+            + SECTION
+            + "][n2i_url], uploading deactivated"
+        )
+        app.n2i_configured = False
+    elif not n2i_token or len(n2i_token) < 64:
+        LOGGER.error(
+            "N2i Token not defined in ["
+            + SECTION
+            + "][n2i_token], uploading deactivated"
+        )
+        app.n2i_configured = False
+    else:
+        LOGGER.info("N2i configured: True")
+        app.n2i_configured = True
     
-    if n2i_url == "" and n2i_token == "":
-        LOGGER.error("[N2i] No url or Token specified in config!")
-    upload(app.previous_picture_file, n2i_url, n2i_token)
+
+@pibooth.hookimpl
+def state_processing_exit(app, cfg):
+    if app.n2i_configured:
+        n2i_url = cfg.get(SECTION, "n2i_url")
+        n2i_token = cfg.get(SECTION, "n2i_token")
+        upload(app.previous_picture_file, n2i_url, n2i_token)
