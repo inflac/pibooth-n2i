@@ -15,6 +15,7 @@ def upload(file:str, n2i_url:str, n2i_token:str):
     file_param = {'file': open(file, 'rb')}
 
     resp = re.post(n2i_url, files=file_param, headers=headers)
+    print(resp.status_code)
     if resp.status_code != 200:
         LOGGER.info("[N2i] Upload failed")
         LOGGER.info(f"[N2i] URL: {n2i_url}")
@@ -31,27 +32,28 @@ def pibooth_startup(app, cfg):
     n2i_url = cfg.get(SECTION, "n2i_url")
     n2i_token = cfg.get(SECTION, "n2i_token")
 
-    if not n2i_url or len(n2i_url) < 4: #url shorther than http scheme length
+    if not n2i_url or len(n2i_url) < 5: #url shorther than http scheme length
         LOGGER.error(
-            "N2i URL not defined in ["
+            "[N2i] URL not defined in ["
             + SECTION
             + "][n2i_url], uploading deactivated"
         )
         app.n2i_configured = False
     elif not n2i_token or len(n2i_token) < 64:
         LOGGER.error(
-            "N2i Token not defined in ["
+            "[N2i] Token not defined in ["
             + SECTION
             + "][n2i_token], uploading deactivated"
         )
         app.n2i_configured = False
     else:
-        LOGGER.info("N2i configured: True")
+        LOGGER.info("[N2i] configured: True")
         app.n2i_configured = True
     
 
 @pibooth.hookimpl
 def state_processing_exit(app, cfg):
+    print(app.n2i_configured)
     if app.n2i_configured:
         n2i_url = cfg.get(SECTION, "n2i_url")
         n2i_token = cfg.get(SECTION, "n2i_token")
